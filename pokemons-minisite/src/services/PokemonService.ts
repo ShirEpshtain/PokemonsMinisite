@@ -1,20 +1,70 @@
-// src/services/PokemonService.ts
-
 import axios from 'axios';
 
-export interface Pokemon {
+export interface PokemonAbility {
+  ability: {
+    name: string;
+    url: string;
+  };
+  is_hidden: boolean;
+  slot: number;
+}
+
+export interface PokemonForm {
   name: string;
   url: string;
 }
 
-const BASE_URL = 'https://pokeapi.co/api/v2/pokemon';
+export interface PokemonSprites {
+  front_default: string;
+}
 
-export const getPokemons = async (): Promise<Pokemon[]> => {
+export interface Pokemon {
+  abilities: PokemonAbility[];
+  base_experience: number;
+  forms: PokemonForm[];
+  sprites: PokemonSprites;
+}
+
+export interface PokemonListResponse {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: PokemonListItem[];
+}
+
+export interface PokemonListItem {
+  id: any;
+  name: string;
+  url: string;
+}
+
+export const getPokemons = async (limit: number): Promise<PokemonListResponse> => {
   try {
-    const response = await axios.get(`${BASE_URL}/?offset=0&limit=100`);
-    return response.data.results;
+    const response = await axios.get<PokemonListResponse>(`https://pokeapi.co/api/v2/pokemon/?limit=${limit}`);
+    return response.data;
   } catch (error) {
     console.error('Error fetching Pokemons:', error);
+    throw error;
+  }
+};
+
+export const getPokemon = async (url: string): Promise<Pokemon> => {
+  try {
+    const response = await axios.get<Pokemon>(url);
+    console.log("data", response.data)
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching Pokemon data:', error);
+    throw error;
+  }
+};
+
+export const getPokemonDetails = async (id: number): Promise<any> => {
+  try {
+    const response = await axios.get(`https://pokeapi.co/api/v2/pokemon/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching Pokemon details:', error);
     throw error;
   }
 };

@@ -1,59 +1,53 @@
-// src/pages/HomePage.tsx
-
 import React, { useEffect, useState } from 'react';
-import { getPokemons, Pokemon } from '../services/PokemonService';
 import PokemonCard from '../components/pokemonCards';
-import PokemonDetails from '../components/pokemonDetails';
-//import './HomePage.scss';
+import { getPokemons, getPokemon, Pokemon, PokemonListResponse, PokemonListItem } from '../services/PokemonService';
 
-interface HomePageProps {}
-
-interface PokemonDetailsProps {
-  name: string;
-  imageUrl: string;
-}
-
-const HomePage: React.FC<HomePageProps> = () => {
-  const [pokemons, setPokemons] = useState<Pokemon[]>([]);
-  const [selectedPokemon, setSelectedPokemon] = useState<Pokemon | null>(null);
+const HomePage: React.FC = () => {
+  const [pokemonList, setPokemonList] = useState<PokemonListResponse | null>(null);
+  const [pokemonData, setPokemonData] = useState<Pokemon | null>(null);
 
   useEffect(() => {
     const fetchPokemons = async () => {
       try {
-        const data = await getPokemons();
-        setPokemons(data);
+        const data = await getPokemons(100); 
+        setPokemonList(data);
       } catch (error) {
-        // Handle error
+        console.error('Error fetching Pokemons:', error);
       }
     };
 
     fetchPokemons();
   }, []);
 
-  const handlePokemonClick = (pokemon: Pokemon) => {
-    setSelectedPokemon(pokemon);
-  };
+  useEffect(() => {
+    const fetchPokemonData = async (url: string) => {
+      try {
+        const data = await getPokemon(url);
+        setPokemonData(data);
+      } catch (error) {
+        console.error('Error fetching Pokemon data:', error);
+      }
+    };
+
+    if (pokemonList && pokemonList.results.length > 0) {
+      const firstPokemonUrl = pokemonList.results[0].url;
+      fetchPokemonData(firstPokemonUrl);
+    }
+  }, [pokemonList]);
 
   return (
-    <div className="home-page">
-      <div className="pokemon-list">
-        {pokemons.map((pokemon) => (
-          <PokemonCard
-            key={pokemon.name}
-            name={pokemon.name}
-            imageUrl={`https://pokeapi.co/media/sprites/pokemon/${pokemon.url.split('/')[6]}.png`}
-            onClick={() => handlePokemonClick(pokemon)}
-          />
-        ))}
-      </div>
-      {selectedPokemon && (
-        <PokemonDetails
-          name={selectedPokemon.name}
-          imageUrl={`https://pokeapi.co/media/sprites/pokemon/${selectedPokemon.url.split('/')[6]}.png`}
+    <div className="App">
+      <h1>Pokémon List</h1>
+      {pokemonList?.results.map((pokemon: PokemonListItem) => (
+        <PokemonCard
+          key={pokemon.name}
+          name={pokemon.name}
+          imageUrl={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.url.split('/')[6]}.png`}
         />
-      )}
+      ))}
     </div>
   );
 };
 
 export default HomePage;
+
