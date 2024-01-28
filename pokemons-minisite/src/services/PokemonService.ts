@@ -38,6 +38,7 @@ export interface PokemonListItem {
   url: string;
 }
 
+//response for the amount of the pokemons that will be desplied
 export const getPokemons = async (limit: number): Promise<PokemonListResponse> => {
   try {
     const response = await axios.get<PokemonListResponse>(`https://pokeapi.co/api/v2/pokemon/?limit=${limit}`);
@@ -48,20 +49,11 @@ export const getPokemons = async (limit: number): Promise<PokemonListResponse> =
   }
 };
 
-export const getPokemon = async (url: string): Promise<Pokemon> => {
-  try {
-    const response = await axios.get<Pokemon>(url);
-    console.log("data", response.data)
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching Pokemon data:', error);
-    throw error;
-  }
-};
-
+// response for the deeper details about each pokemons as weight and height
 export const getPokemonDetails = async (id: number): Promise<any> => {
   try {
     const response = await axios.get(`https://pokeapi.co/api/v2/pokemon/${id}`);
+    console.log(response.data)
     return response.data;
   } catch (error) {
     console.error('Error fetching Pokemon details:', error);
